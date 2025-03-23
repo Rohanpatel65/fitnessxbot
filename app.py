@@ -2,23 +2,26 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Route to return student number
+# Route 1: Return student number
 @app.route('/')
 def home():
     return jsonify({"student_number": "200590360"})
 
-# Webhook route for Dialogflow fulfillment
+# Route 2: Webhook for Dialogflow
 @app.route('/webhook', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
     
-    response_text = "This is a response from your Flask webhook."
+    # Get the intent name
+    intent_name = req.get("queryResult", {}).get("intent", {}).get("displayName", "")
 
-    res = {
-        "fulfillmentText": response_text
-    }
+    # Response based on intent
+    if intent_name == "Motivational Quote":
+        response_text = "Believe in yourself! Every day is a new opportunity to grow."
+    else:
+        response_text = "I'm not sure how to respond to that."
 
-    return jsonify(res)
+    return jsonify({"fulfillmentText": response_text})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(port=5000, debug=True)
